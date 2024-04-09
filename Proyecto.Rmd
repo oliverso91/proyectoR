@@ -12,7 +12,7 @@ library(readr)
 
 #1.2 carga de CSV
 cities <- read_csv("cities.csv")
-meal_types <- read_csv("meal_types.csv", sep=",")
+meal_types <- read_csv("meal_types.csv")
 meals <- read_csv("meals.csv")
 members <- read_csv("members.csv")
 monthly_member_totals <- read_csv("monthly_member_totals.csv")
@@ -93,5 +93,56 @@ ggplot(monthly_member_totals, aes(x = month, y = order_proportion, color = month
   scale_color_manual(values = c("Enero" = "orange", "Febrero" = "blue", "Marzo" = "green", "Abril" = "yellow", "Mayo" = "purple")) +
   theme_minimal()
 
+```
+
+```{r}
+#.4. Utilice la función inner-join y construya las relaciones correspondientes (tome en cuenta cada uno de los identificadores de cada archivo), agregue sufijos a las columnas coincidentes por medio del parámetro suffix. Asigne la relación construida a una variable
+
+#encabezado_cities <- c("city_id", "city" )
+#colnames(cities) <- encabezado_cities
+
+#encabezado_members <- c("member_id")
+#colnames(members$id) <- encabezado_members
+
+names(cities)[names(cities) == "id"] <- "city_id"
+names(members)[names(members) == "id"] <- "member_id"
+names(orders)[names(orders) == "id"] <- "order_id"
+names(restaurants)[names(restaurants) == "id"] <- "restaurant_id"
+
+
+print(cities)
+print(meal_types)
+print(meals)
+print(members)
+print(monthly_member_totals)
+print(order_details)
+print(orders)
+print(restaurant_types)
+print(restaurants)
+print(serve_types)
+
+city_order_restaurant <- inner_join(cities, members, by = c("city_id" = "city_id"), suffix = c(".cities", ".member")) %>%
+            inner_join(orders, by = c("member_id" = "member_id"), suffix = c(".member", ".orders")) %>%
+            inner_join(restaurants, by = c("restaurant_id" = "restaurant_id"), suffix = c(".orders", ".restaurants"))
+
+#3.5. Use la función select en la variable creada anteriormente 
+
+select_restaurant <- select(city_order_restaurant,
+                               first_name,
+                               surname,
+                               sex,
+                               email,
+                              city,
+                               date,
+                               hour,
+                               total_order,
+                               restaurant_name,
+                               city_id.restaurants)
+
+#3.6. Cree un ordenamiento ascendente para el campo date_order.
+
+select_restaurant_order_a <- select_restaurant[order(select_restaurant$date, decreasing = FALSE),]
+
+print(select_restaurant)
 ```
 
