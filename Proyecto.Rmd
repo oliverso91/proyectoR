@@ -146,3 +146,63 @@ select_restaurant_order_a <- select_restaurant[order(select_restaurant$date, dec
 print(select_restaurant)
 ```
 
+```{r}
+#3.8
+
+print(cities)
+print(meal_types)
+print(meals)
+print(members)
+print(monthly_member_totals)
+print(order_details)
+print(orders)
+print(restaurant_types)
+print(restaurants)
+print(serve_types)
+
+#3.9 Utilice la función inner-join y construya las relaciones correspondientes, agregue sufijos a las columnas coincidentes por medio del parámetro suffix. Asigne la relación construida a una variable.
+
+names(cities)[names(cities) == "id"] <- "city_id"
+names(serve_types)[names(serve_types) == "id"] <- "serve_type_id"
+names(meal_types)[names(meal_types) == "id"] <- "meal_type_id"
+names(restaurants)[names(restaurants) == "id"] <- "restaurant_id"
+names(restaurant_types)[names(restaurant_types) == "id"] <- "restaurant_type_id"
+
+
+restaurant_types_join <- inner_join(meals, serve_types, by = c("serve_type_id" = "serve_type_id"), suffix = c(".meals", ".serve_types")) %>%
+            inner_join(meal_types, by = c("meal_type_id" = "meal_type_id"), suffix = c(".meals", ".meal_types")) %>%
+            inner_join(restaurants, by = c("restaurant_id" = "restaurant_id"), suffix = c(".meals", ".restaurants")) %>%
+            inner_join(cities, by = "city_id", suffix = c(".restaurants", ".cities")) %>%
+            inner_join(restaurant_types, by = c("restaurant_type_id" = "restaurant_type_id"), suffix = c(".restaurants", ".restaurant_types"))
+
+
+#3.10 Use la función select en la variable creada anteriormente para presentar los siguientes campos: restaurant_name, city, restaurant_type, income_persentage, serve_type, meal_type, meal_name, price
+
+select_restaurant_order_price <- select(restaurant_types_join,
+                              restaurant_name,
+                              city,
+                              restaurant_type,
+                              income_persentage,
+                              serve_type,
+                              meal_type,
+                              meal_name,
+                              price)
+
+#3.11 Use la función count en la variable creada anteriormente para obtener el conteo por la variable meal_type, luego asigne el resultado a una variable.
+
+count_restaurant_order_price <- count(select_restaurant_order_price, meal_type)
+
+#3.12
+print(count_restaurant_order_price)
+
+#3.13 Use la función group_by en la variable creada en el inciso 3.10 y agrupe por city, luego aplique la función summarize para obtener la sumatoria de income_persentage, asigne a la sumatoria la etiqueta sumIncomePersentaje, el resultado deberá almacenarlo en una variable.
+
+sum_restaurant_order_price  <- select_restaurant_order_price %>%
+                                 group_by(city) %>%
+                                 summarize(sumIncomePersentaje = sum(income_persentage))
+
+#3.14
+print(sum_restaurant_order_price)
+
+```
+
