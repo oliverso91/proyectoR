@@ -48,15 +48,11 @@ members$sex <- factor(members$sex, levels = c("F", "M"), labels = c("Femenino", 
 
 print(members$sex)
 
-
 #2.2. Use la variable donde asigno el archivo "meals.csv" y por medio del concepto de Factores transforme la columna hot_cold a un factor y aplique un ordenamiento donde"cold"esmenorque"hot".Valideusandounacomparación(cold < hot).
-meals$hot_cold <- factor(meals$hot_cold, levels = c("cold", "hot"))
 
-comparacion <- "cold" < "hot"
+meals$hot_cold <- factor(meals$hot_cold, levels = c("Cold", "Hot"), ordered = TRUE)
+print(meals$hot_cold)
 
-print(comparacion)
-
-#pendiente duda 
 
 
 #2.3. Use la variable donde asigno el archivo "monthly_member_totals.csv" y por medio del concepto de Factores transforme la columna sex a un factor y renombre los niveles "F" y "M" por "Femenino" y "Masculino", haga lo mismo con la columna month y renombre los niveles "1", "2", "3", "4" y "5" por "Enero", "Febrero", "Marzo", "Abril" y "Mayo" respectivamente. Por último, agregue una nueva columna por medio de la función mutate, que calculará la proporción de órdenes (usando la variable "order_count") por la cantidad de comidas (usando la variable "meals_count").
@@ -70,6 +66,7 @@ monthly_member_totals <- monthly_member_totals %>%
 
 #2.4
 print(monthly_member_totals)
+View(monthly_member_totals)
 
 ```
 
@@ -90,13 +87,14 @@ ggplot(monthly_member_totals, aes(x = month, y = order_proportion)) +
 
 ggplot(monthly_member_totals, aes(x = month, y = order_proportion, color = month)) +
   geom_line() +
-  scale_color_manual(values = c("Enero" = "orange", "Febrero" = "blue", "Marzo" = "green", "Abril" = "yellow", "Mayo" = "purple")) +
+ # scale_color_manual(values = c("Enero" = "orange", "Febrero" = "blue", "Marzo" = "green", "Abril" = #"yellow", "Mayo" = "purple")) +
   theme_minimal()
+
 
 ```
 
 ```{r}
-#.4. Utilice la función inner-join y construya las relaciones correspondientes (tome en cuenta cada uno de los identificadores de cada archivo), agregue sufijos a las columnas coincidentes por medio del parámetro suffix. Asigne la relación construida a una variable
+#3.4. Utilice la función inner-join y construya las relaciones correspondientes (tome en cuenta cada uno de los identificadores de cada archivo), agregue sufijos a las columnas coincidentes por medio del parámetro suffix. Asigne la relación construida a una variable
 
 #encabezado_cities <- c("city_id", "city" )
 #colnames(cities) <- encabezado_cities
@@ -141,8 +139,8 @@ select_restaurant <- select(city_order_restaurant,
 
 #3.6. Cree un ordenamiento ascendente para el campo date_order.
 
-select_restaurant_order_a <- select_restaurant[order(select_restaurant$date, decreasing = FALSE),]
-
+select_restaurant <- select_restaurant[order(select_restaurant$date, decreasing = FALSE),]
+view(select_restaurant)
 print(select_restaurant)
 ```
 
@@ -175,6 +173,7 @@ restaurant_types_join <- inner_join(meals, serve_types, by = c("serve_type_id" =
             inner_join(cities, by = "city_id", suffix = c(".restaurants", ".cities")) %>%
             inner_join(restaurant_types, by = c("restaurant_type_id" = "restaurant_type_id"), suffix = c(".restaurants", ".restaurant_types"))
 
+view(restaurant_types_join)
 
 #3.10 Use la función select en la variable creada anteriormente para presentar los siguientes campos: restaurant_name, city, restaurant_type, income_persentage, serve_type, meal_type, meal_name, price
 
@@ -188,12 +187,13 @@ select_restaurant_order_price <- select(restaurant_types_join,
                               meal_name,
                               price)
 
+view(select_restaurant_order_price)
 #3.11 Use la función count en la variable creada anteriormente para obtener el conteo por la variable meal_type, luego asigne el resultado a una variable.
 
 count_restaurant_order_price <- count(select_restaurant_order_price, meal_type)
 
 #3.12
-print(count_restaurant_order_price)
+view(count_restaurant_order_price)
 
 #3.13 Use la función group_by en la variable creada en el inciso 3.10 y agrupe por city, luego aplique la función summarize para obtener la sumatoria de income_persentage, asigne a la sumatoria la etiqueta sumIncomePersentaje, el resultado deberá almacenarlo en una variable.
 
@@ -203,6 +203,192 @@ sum_restaurant_order_price  <- select_restaurant_order_price %>%
 
 #3.14
 print(sum_restaurant_order_price)
+view(sum_restaurant_order_price)
 
+
+#3.15 Tome de referencia la variable anterior y aplique la función ggplot para construir un
+#gráfico de barras, use city para el eje x y sumIncomePersentaje para el eje y.
+ggplot(monthly_member_totals, aes(x = month, y = order_proportion)) +
+  geom_line(color = "red") +
+  theme_minimal()
+
+grafico_barras_city <- ggplot(sum_restaurant_order_price, aes(x = city, y = sumIncomePersentaje)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Ciudad", y = "Porcentaje de Ingresos Sumados") +
+  ggtitle("Porcentaje de Ingresos Sumados por Ciudad")
+
+
+print(grafico_barras_city)
+
+
+#3.16 Utilice la variable city para definir un color distinto en la estética de la gráfica.
+
+grafico_barras_city_color <- ggplot(sum_restaurant_order_price, aes(x = city, y = sumIncomePersentaje, fill = city)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Ciudad", y = "Porcentaje de Ingresos Sumados") +
+  ggtitle("Porcentaje de Ingresos Sumados por Ciudad") 
+
+print(grafico_barras_city_color)
+
+
+#Conociendo la tendencia de consumo en un restaurante en particular
+
+
+
+# 3.17 y  Use la función filter en la variable creada en el inciso 3.10 para obtener los datos
+# que cumplan con las siguientes condiciones:
+# 3.18 Guarde el resultado en una variable
+
+restaurant_filter <- filter(select_restaurant_order_price, meal_type %in% c("Vegan", "Chicken"), 
+                          restaurant_name == "Restaurant 2", price > 30)
+
+view(restaurant_filter)
+
+#3.19 Utilice la variable del inciso anterior para aplicar la ggplot y construir un gráfico de
+#barras, use serve_type para el eje x y price para el eje y.
+#3.20 Investigue cómo utilizar la función labs para agregar un título, un subtítulo y
+#etiquetas al eje x y y.
+
+grafico_barras_Restaurante <- ggplot(restaurant_filter, aes(x = serve_type, y = price)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(x = "Tipo de Servicio", y = "Precio") +
+  ggtitle("Precio por Tipo de Servicio en Restaurant 2 (Vegan o Chiken)")
+
+print(grafico_barras_Restaurante)
+
+# Tendencias de comida por restaurante y ubicación (ciudad)
+
+#3.21 Tomando como referencia las variables en donde asigno los siguiente archivos
+
+print(cities)
+print(restaurants)
+print(restaurant_types)
+print(orders)
+print(meals)
+print(serve_types)
+print(meal_types)
+print(order_details)
+
+names(cities)[names(cities) == "id"] <- "city_id"
+names(restaurants)[names(restaurants) == "id"] <- "restaurant_id"
+names(restaurant_types)[names(restaurant_types) == "id"] <- "restaurant_type_id"
+names(orders)[names(orders) == "id"] <- "order_id"
+names(meals)[names(meals) == "id"] <- "meal_id"
+names(serve_types)[names(serve_types) == "id"] <- "serve_type_id"
+names(meal_types)[names(meal_types) == "id"] <- "meal_type_id"
+names(order_details)[names(order_details) == "id"] <- "order_details_id"
+
+
+#3.22 Utilice la función inner-join y construya las relaciones correspondientes, agregue
+#sufijos a las columnas coincidentes por medio del parámetro suffix. Asigne la
+#relación construida a una variable.
+
+restaurant_cities_join <- left_join(meals, order_details, by = c("meal_id" = "meal_id"), suffix = c(".meals", ".order_details")) %>%
+            inner_join(restaurants, by = c("restaurant_id" = "restaurant_id"), suffix = c(".meals", ".restaurants")) %>%
+            inner_join(serve_types, by = c("serve_type_id" = "serve_type_id"), suffix = c(".serve_types", ".meals")) %>%
+            inner_join(meal_types, by = c("meal_type_id" = "meal_type_id"), suffix = c(".meals", ".meal_types")) %>%
+            inner_join(orders, by = c("order_id" = "order_id"), suffix = c(".orderss", ".order_details"))%>%
+            inner_join(cities, by = c("city_id" = "city_id"), suffix = c(".cities", ".restaurants"))%>%
+            inner_join(restaurant_types, by = c("restaurant_type_id" = "restaurant_type_id"), suffix = c(".restaurant_types", ".restaurants"))
+
+view(restaurant_cities_join)
+
+
+restaurant_cities_join <- left_join(meals, order_details, by = c("meal_id" = "meal_id"), suffix = c(".meals", ".order_details"))
+view(restaurant_cities_join)
+
+restaurant_cities_join <- inner_join(cities, restaurants, by = c("city_id" = "city_id"), suffix = c(".cities", ".restaurants")) %>%
+            inner_join(restaurant_types, by = c("restaurant_type_id" = "restaurant_type_id"), suffix = c(".restaurant_types", ".restaurants")) %>%
+            inner_join(orders, by = c("restaurant_id" = "restaurant_id"), suffix = c(".orders", ".restaurants")) %>%
+            inner_join(meals, by =c("restaurant_id","restaurant_id"), suffix = c(".meals", ".restaurants")) %>%
+            inner_join(serve_types, by = c("serve_type_id" = "serve_type_id"), suffix = c(".serve_types", ".meals"))%>%
+            inner_join(meal_types, by = c("meal_type_id" = "meal_type_id"), suffix = c(".meal_types", ".meals"))%>%
+            inner_join(order_details, by = c("order_id" = "order_id"), suffix = c(".order_details", ".orders"))
+
+
+#3.23 Use la función select en la variable creada anteriormente para presentar los
+ #siguientes campos
+
+
+select_restaurant_cities_join <- select(restaurant_cities_join,
+                              restaurant_name,
+                              city,
+                              restaurant_type,
+                              income_persentage,
+                              serve_type,
+                              meal_type,
+                              meal_name,
+                              price,
+                              date,
+                              hour,
+                              total_order,
+                              order_details_id)
+
+view(select_restaurant_cities_join)
+
+
+#3.24 Tome la variable del inciso anterior y aplique la función group_by para agrupar por city, restaurant_name, meal_name.
+
+restaurant_cities_grouped <- restaurant_cities_join %>%
+  group_by(city, restaurant_name, meal_name)
+
+view(restaurant_cities_grouped)
+
+#3.25 Luego utilice la función summarise para obtener la sumatoria de total_order y asigne la etiqueta totals.
+
+
+restaurant_cities_summarised <- restaurant_cities_grouped %>%
+  summarise(totals = sum(total_order))
+
+#3.26
+view(restaurant_cities_summarised)
+
+#3.27 Toma la variable del inciso anterior y construye una gráfica de barras por medio de la función ggplot. Para ello use restaurant_name en el eje x y totals en el eje y.
+
+grafico_barras <- ggplot(restaurant_cities_summarised, aes(x = restaurant_name, y = totals)) +
+  geom_bar(stat = "identity", fill = "Yellow") +
+  labs(x = "Nombre del Restaurante", y = "Totales") +
+  ggtitle("Suma Total de Órdenes por Restaurante")
+
+print(grafico_barras)
+
+
+#3.28 Por último, toma de referencia el inciso anterior y aplica faceting tomando de referencia la variable city.
+
+grafico_barras_facet <- ggplot(restaurant_cities_summarised, aes(x = restaurant_name, y = totals)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(x = "Nombre del Restaurante", y = "Totales") +
+  ggtitle("Suma Total de Órdenes por Restaurante") +
+  facet_wrap(~ city, scales = "free_x", ncol = 2)
+
+print(grafico_barras_facet)
+
+
+
+# Análisis estadístico propio
+
+#3.29 Utilice la variable donde asigno el archivo "monthly_member_totals.csv" y haga un análisis estadístico propio considerando lo siguiente
+
+monthly_member_totals_filtered <- filter(monthly_member_totals, month == 1)
+
+# Ejemplo de aplicar group_by, summarise y count para obtener estadísticas por categoría (ej. por tipo de membresía)
+monthly_member_totals_summary <- monthly_member_totals %>%
+  group_by(member_id) %>%
+  summarise(Sum_total_amount = sum(total_expense),
+            average_commission = mean(commission),
+            count = n())
+
+
+view(monthly_member_totals_summary)
+
+
+grafico_barras <- ggplot(monthly_member_totals_summary, aes(x = member_id, y = Sum_total_amount)) +
+  geom_bar(stat = "identity", fill = "brown") +     
+  labs(x = " Membresía", y = "Monto total gastado") +
+  ggtitle("Monto Total gastado por Tipo de Membresía")
+
+print(grafico_barras)
+
+#30
 ```
 
