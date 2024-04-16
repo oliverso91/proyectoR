@@ -1,4 +1,6 @@
 #Proyecto
+#Oliver Alexander Rodas Mendoza
+#Carlos Luis Pablo Hernández Gramajo
 ```{r}
 #1.1 librerias 
 if(!require(ggplot2)) install.packages("ggplot2")
@@ -24,16 +26,16 @@ serve_types <- read_csv("serve_types.csv")
 
 
 #1.3 imprimir los CSV
-print(cities)
-print(meal_types)
-print(meals)
-print(members)
-print(monthly_member_totals)
-print(order_details)
-print(orders)
-print(restaurant_types)
-print(restaurants)
-print(serve_types)
+View(cities)
+View(meal_types)
+View(meals)
+View(members)
+View(monthly_member_totals)
+View(order_details)
+View(orders)
+View(restaurant_types)
+View(restaurants)
+View(serve_types)
 
 #1.4 use head & str
 
@@ -43,51 +45,54 @@ head(cities)
 ```
 ```{r}
 #2.1. Luego de cargar los datos y asignarlos a variables, use aquella variable donde asigno el archivo "members.csv" y por medio del concepto de Factores transforme la columna sex a un factor y renombre los niveles "F" y "M" por "Femenino" y "Masculino" respectivamente.
+members2 = members
+members2$sex <- factor(members2$sex, levels = c("F", "M"), labels = c("Femenino", "Masculino"))
 
-members$sex <- factor(members$sex, levels = c("F", "M"), labels = c("Femenino", "Masculino"))
-
-print(members$sex)
+view(members2)
 
 #2.2. Use la variable donde asigno el archivo "meals.csv" y por medio del concepto de Factores transforme la columna hot_cold a un factor y aplique un ordenamiento donde"cold"esmenorque"hot".Valideusandounacomparación(cold < hot).
-
-meals$hot_cold <- factor(meals$hot_cold, levels = c("Cold", "Hot"), ordered = TRUE)
-print(meals$hot_cold)
+meals2 <- meals
+meals2$hot_cold <- factor(meals2$hot_cold, levels = c("Cold", "Hot"), ordered = TRUE)
+print(meals2$hot_cold)
 
 
 
 #2.3. Use la variable donde asigno el archivo "monthly_member_totals.csv" y por medio del concepto de Factores transforme la columna sex a un factor y renombre los niveles "F" y "M" por "Femenino" y "Masculino", haga lo mismo con la columna month y renombre los niveles "1", "2", "3", "4" y "5" por "Enero", "Febrero", "Marzo", "Abril" y "Mayo" respectivamente. Por último, agregue una nueva columna por medio de la función mutate, que calculará la proporción de órdenes (usando la variable "order_count") por la cantidad de comidas (usando la variable "meals_count").
 
-monthly_member_totals$sex <- factor(monthly_member_totals$sex, levels = c("F", "M"), labels = c("Femenino", "Masculino"))
+monthly_member_totals2 <- monthly_member_totals
+monthly_member_totals2$sex <- factor(monthly_member_totals2$sex, levels = c("F", "M"), labels = c("Femenino", "Masculino"))
 
-monthly_member_totals$month <- factor(monthly_member_totals$month, levels = c("1", "2", "3", "4", "5"), labels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo"))
+#se encontro un mes mas
+monthly_member_totals2$month <- factor(monthly_member_totals2$month, levels = c("1", "2", "3", "4", "5"), labels = c("Enero", "Febrero", "Marzo", "Abril", "Mayo"))
 
-monthly_member_totals <- monthly_member_totals %>% 
-  mutate(order_proportion = order_count / meals_count)
+#monthly_member_totals2$month <- factor(monthly_member_totals2$month, levels = c("1", "2", "3", "4", "5","6"), labels = c("Enero", "Febrero", "Marzo", "Abril", #"Mayo","Junio"))
+
+monthly_member_totals2 <- monthly_member_totals2 %>% 
+mutate(order_proportion = order_count / meals_count)
 
 #2.4
-print(monthly_member_totals)
-View(monthly_member_totals)
+print(monthly_member_totals2)
+View(monthly_member_totals2)
 
 ```
 
 ```{r}
 #Si ahora graficamos la proporción order_count/meals_count, (columna construida en el inciso 2.3) veremos un patrón curioso.
 
-ggplot(monthly_member_totals, aes(x = meals_count, y = order_count / meals_count)) +
+ggplot(monthly_member_totals2, aes(x = meals_count, y = order_proportion)) +
   geom_point() +
   theme_minimal()
 
 #3.1 Utilice ggplot para hacer una gráfica lineal. Tome de referencia la variable creada en el inciso 2.3 (eje y) versus la variable month (eje x).
 
-ggplot(monthly_member_totals, aes(x = month, y = order_proportion)) +
+ggplot(monthly_member_totals2, aes(x = month, y = order_proportion)) +
   geom_line(color = "red") +
   theme_minimal()
 
 #3.2 Utilice la variable month para definir un color distinto en la estética de la gráfica.
 
-ggplot(monthly_member_totals, aes(x = month, y = order_proportion, color = month)) +
+ggplot(monthly_member_totals2, aes(x = month, y = order_proportion, color = month)) +
   geom_line() +
- # scale_color_manual(values = c("Enero" = "orange", "Febrero" = "blue", "Marzo" = "green", "Abril" = #"yellow", "Mayo" = "purple")) +
   theme_minimal()
 
 
@@ -208,9 +213,6 @@ view(sum_restaurant_order_price)
 
 #3.15 Tome de referencia la variable anterior y aplique la función ggplot para construir un
 #gráfico de barras, use city para el eje x y sumIncomePersentaje para el eje y.
-ggplot(monthly_member_totals, aes(x = month, y = order_proportion)) +
-  geom_line(color = "red") +
-  theme_minimal()
 
 grafico_barras_city <- ggplot(sum_restaurant_order_price, aes(x = city, y = sumIncomePersentaje)) +
   geom_bar(stat = "identity", fill = "steelblue") +
@@ -294,16 +296,6 @@ restaurant_cities_join <- left_join(meals, order_details, by = c("meal_id" = "me
 view(restaurant_cities_join)
 
 
-restaurant_cities_join <- left_join(meals, order_details, by = c("meal_id" = "meal_id"), suffix = c(".meals", ".order_details"))
-view(restaurant_cities_join)
-
-restaurant_cities_join <- inner_join(cities, restaurants, by = c("city_id" = "city_id"), suffix = c(".cities", ".restaurants")) %>%
-            inner_join(restaurant_types, by = c("restaurant_type_id" = "restaurant_type_id"), suffix = c(".restaurant_types", ".restaurants")) %>%
-            inner_join(orders, by = c("restaurant_id" = "restaurant_id"), suffix = c(".orders", ".restaurants")) %>%
-            inner_join(meals, by =c("restaurant_id","restaurant_id"), suffix = c(".meals", ".restaurants")) %>%
-            inner_join(serve_types, by = c("serve_type_id" = "serve_type_id"), suffix = c(".serve_types", ".meals"))%>%
-            inner_join(meal_types, by = c("meal_type_id" = "meal_type_id"), suffix = c(".meal_types", ".meals"))%>%
-            inner_join(order_details, by = c("order_id" = "order_id"), suffix = c(".order_details", ".orders"))
 
 
 #3.23 Use la función select en la variable creada anteriormente para presentar los
@@ -328,17 +320,13 @@ view(select_restaurant_cities_join)
 
 
 #3.24 Tome la variable del inciso anterior y aplique la función group_by para agrupar por city, restaurant_name, meal_name.
-
-restaurant_cities_grouped <- restaurant_cities_join %>%
-  group_by(city, restaurant_name, meal_name)
-
-view(restaurant_cities_grouped)
-
 #3.25 Luego utilice la función summarise para obtener la sumatoria de total_order y asigne la etiqueta totals.
 
 
-restaurant_cities_summarised <- restaurant_cities_grouped %>%
-  summarise(totals = sum(total_order))
+restaurant_cities_summarised <- restaurant_cities_join %>%
+  group_by(city, restaurant_name, meal_name) %>%
+summarise(totals = sum(total_order), .groups = "keep")
+
 
 #3.26
 view(restaurant_cities_summarised)
@@ -370,25 +358,53 @@ print(grafico_barras_facet)
 #3.29 Utilice la variable donde asigno el archivo "monthly_member_totals.csv" y haga un análisis estadístico propio considerando lo siguiente
 
 monthly_member_totals_filtered <- filter(monthly_member_totals, month == 1)
+#monthly_member_totals_filtered <- filter(monthly_member_totals, month == 2)
+#monthly_member_totals_filtered <- filter(monthly_member_totals, month == 3)
+#monthly_member_totals_filtered <- filter(monthly_member_totals, month == 4)
+#monthly_member_totals_filtered <- filter(monthly_member_totals, month == 5)
+#monthly_member_totals_filtered <- filter(monthly_member_totals, month == 6)
 
-# Ejemplo de aplicar group_by, summarise y count para obtener estadísticas por categoría (ej. por tipo de membresía)
-monthly_member_totals_summary <- monthly_member_totals %>%
-  group_by(member_id) %>%
+
+monthly_member_totals_summary <- monthly_member_totals_filtered %>%
+  group_by(sex,city,year,month) %>%
   summarise(Sum_total_amount = sum(total_expense),
-            average_commission = mean(commission),
-            count = n())
+            sum_monthly_budget = sum(monthly_budget),
+            sum_meals_count = sum(meals_count),
+            count_Sex = n(),.groups = "keep")
 
 
 view(monthly_member_totals_summary)
 
 
-grafico_barras <- ggplot(monthly_member_totals_summary, aes(x = member_id, y = Sum_total_amount)) +
-  geom_bar(stat = "identity", fill = "brown") +     
-  labs(x = " Membresía", y = "Monto total gastado") +
-  ggtitle("Monto Total gastado por Tipo de Membresía")
+grafico_barras <- ggplot(monthly_member_totals_summary, aes(x = city, y = count_Sex, fill = city)) +
+  geom_bar(stat = "identity") +     
+  labs(x = "Ciudad", y = "Personas") +
+  ggtitle(" Grafica de barras: Ciudades más visitadas en Enero")
 
 print(grafico_barras)
 
-#30
+
+# Datos de ejemplo
+categorias <-monthly_member_totals_summary$sex
+porcentajes <- monthly_member_totals_summary$count_Sex
+citys   <- monthly_member_totals_summary$city
+# Crear un gráfico de pie
+pie(porcentajes, labels = paste(categorias," ", citys, "(", porcentajes,  "%)", sep = ""), main = "Gráfico de Pie  Género vs ciudad")
+
+
+
+ggplot(monthly_member_totals_summary, aes(x = Sum_total_amount, y = sum_monthly_budget)) +   geom_point(aes(color= sex, size = city)) +   theme_minimal()+
+labs(x = "Gastos", y = "Presupuesto") +
+  ggtitle(" Grafica de puntos: Gastos vs Presupuesto por genero y ciudad")
+
+#30 
+
+# Gráfica de barras :Ciudades más visitadas en enero. Podemos observar que la ciudad de Herzelia es la más visitada con un aproximado de 50 personas en el mes de enero.
+# Gráfica  Pie  Género vs Ciudad, Se puede observar que la mayor concentración de mujeres está en la ciudad de Herzelia con un 27% y la mayor concentración de hombres.
+# Está en Ramat hasharo con un 25% en el mes de enero.
+
+#Grafica de puntos: Gastos vs Presupuesto por género y ciudad. Se puede observar cómo están distribuidos los gastos por ciudad de cada uno de los generos.
+# evaluado según el presupuesto que manejaban.
+
 ```
 
